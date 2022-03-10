@@ -167,8 +167,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameBoard: {fileID: 1537040746}
-  turn: 0
   stateChanged: 0
+  startingTurn: 0
+  turn: 0
 --- !u!1 &158417788
 GameObject:
   m_ObjectHideFlags: 0
@@ -181,7 +182,7 @@ GameObject:
   - component: {fileID: 158417791}
   - component: {fileID: 158417790}
   m_Layer: 5
-  m_Name: Background
+  m_Name: Start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

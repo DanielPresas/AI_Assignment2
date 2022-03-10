@@ -23,7 +23,14 @@ public class Board : MonoBehaviour {
         State.Empty, State.Empty, State.Empty,
     };
 
-    public bool CheckWin(GameManager.Turn turnToCheck) {
+    public bool CheckTie() {
+        foreach(var s in state) {
+            if(s == State.Empty) return false;
+        }
+        return true;
+    }
+
+    public bool CheckWin(Turn turnToCheck) {
         bool CheckRow(int row) {
             var st = state[row * HEIGHT];
             var check = true;
@@ -88,10 +95,10 @@ public class Board : MonoBehaviour {
                 continue;
             }
 
-            if(state[row] == State.PlayerPiece && turnToCheck == GameManager.Turn.Player) {
+            if(state[row] == State.PlayerPiece && turnToCheck == Turn.Player) {
                 return true;
             }
-            else if(state[row] == State.AiPiece && turnToCheck == GameManager.Turn.AI) {
+            else if(state[row] == State.AiPiece && turnToCheck == Turn.Ai) {
                 return true;
             }
         }
@@ -102,29 +109,29 @@ public class Board : MonoBehaviour {
                 continue;
             }
 
-            if(state[j] == State.PlayerPiece && turnToCheck == GameManager.Turn.Player) {
+            if(state[j] == State.PlayerPiece && turnToCheck == Turn.Player) {
                 return true;
             }
-            else if(state[j] == State.AiPiece && turnToCheck == GameManager.Turn.AI) {
+            else if(state[j] == State.AiPiece && turnToCheck == Turn.Ai) {
                 return true;
             }
         }
 
         // @Note: Diagonal checks
         if(CheckDiagonal(upwards: true)) {
-            if(state[0] == State.PlayerPiece && turnToCheck == GameManager.Turn.Player) {
+            if(state[0] == State.PlayerPiece && turnToCheck == Turn.Player) {
                 return true;
             }
-            else if(state[0] == State.AiPiece && turnToCheck == GameManager.Turn.AI) {
+            else if(state[0] == State.AiPiece && turnToCheck == Turn.Ai) {
                 return true;
             }
         }
 
         if(CheckDiagonal(upwards: false)) {
-            if(state[WIDTH - 1] == State.PlayerPiece && turnToCheck == GameManager.Turn.Player) {
+            if(state[WIDTH - 1] == State.PlayerPiece && turnToCheck == Turn.Player) {
                 return true;
             }
-            else if(state[WIDTH - 1] == State.AiPiece && turnToCheck == GameManager.Turn.AI) {
+            else if(state[WIDTH - 1] == State.AiPiece && turnToCheck == Turn.Ai) {
                 return true;
             }
         }

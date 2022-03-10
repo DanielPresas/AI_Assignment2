@@ -9,14 +9,16 @@ public class MouseButton {
     public const int Middle = 2;
 }
 
+public enum Turn {
+    Player, Ai
+}
+
 public class GameManager : MonoBehaviour {
-    public enum Turn {
-        Player, AI
-    }
 
     public Board gameBoard   = null;
-    public Turn turn         = Turn.Player;
     public bool stateChanged = false;
+    public Turn startingTurn = Turn.Player;
+    public Turn turn         = Turn.Player;
 
     List<GameObject> _playerPieces = new List<GameObject>();
     List<GameObject> _aiPieces     = new List<GameObject>();
@@ -27,7 +29,7 @@ public class GameManager : MonoBehaviour {
     int _activeTriggers     = 0;
 
     Coroutine _resetCoroutine = null;
-    Coroutine _aiCoroutine    = null;
+    float _aiWaitTime = 0.0f;
 
     private void Update() {
         {
@@ -37,12 +39,11 @@ public class GameManager : MonoBehaviour {
                 Debug.Log($"Player wins!");
                 endGame = true;
             }
-            else if(gameBoard.CheckWin(Turn.AI)) {
+            else if(gameBoard.CheckWin(Turn.Ai)) {
                 Debug.Log($"AI wins!");
                 endGame = true;
             }
-            else if(_activeTriggers <= 0) {
-            // else if(_activePlayerPieces + _activeAiPieces == gameBoard.state.Length) {
+            else if(gameBoard.CheckTie()) {
                 Debug.Log("Draw! Resetting...");
                 endGame = true;
             }
@@ -73,13 +74,32 @@ public class GameManager : MonoBehaviour {
                 _activeTriggers -= 1;
 
                 stateChanged = true;
-                turn = Turn.AI;
+                turn = Turn.Ai;
+                _aiWaitTime = 0.5f;
             }
+            Debug.Log("AI turn");
         }
         else {
-            if(_aiCoroutine == null) {
-                _aiCoroutine = StartCoroutine(AiTurn());
+            if(_aiWaitTime >= 0.0f) {
+                _aiWaitTime -= Time.deltaTime;
+                return;
             }
+
+            do {
+                var bestMove = MinimaxAI.FindBestMove(gameBoard);
+                if(!_triggers[bestMove].activeSelf) continue;
+
+                Debug.Log($"AI chose: {bestMove + 1}");
+                gameBoard.state[bestMove] = Board.State.NewAiPiece;
+                _triggers[bestMove].SetActive(false);
+                _activeTriggers -= 1;
+
+                stateChanged = true;
+            }
+            while(!stateChanged);
+
+            turn = Turn.Player;
+            Debug.Log("Player turn");
         }
 
         UpdateBoard();
@@ -119,37 +139,15 @@ public class GameManager : MonoBehaviour {
         }
 
         if(playerIsX) {
-            turn = Turn.Player;
+            startingTurn = turn = Turn.Player;
             _playerPieces.AddRange(xPieces);
             _aiPieces.AddRange(oPieces);
         }
         else {
-            turn = Turn.AI;
+            startingTurn = turn = Turn.Ai;
             _aiPieces.AddRange(xPieces);
             _playerPieces.AddRange(oPieces);
         }
-    }
-
-    IEnumerator AiTurn() {
-        Debug.Log("AI Turn");
-        yield return new WaitForSeconds(2.0f);
-
-        do {
-            var rand = Mathf.FloorToInt(Random.Range(0.0f, 1.0f) * 8.0f + 0.5f);
-            if(!_triggers[rand].activeSelf) continue;
-
-            Debug.Log($"AI chose: {rand + 1}");
-            gameBoard.state[rand] = Board.State.NewAiPiece;
-            _triggers[rand].SetActive(false);
-            _activeTriggers -= 1;
-
-            stateChanged = true;
-        }
-        while(!stateChanged);
-
-        Debug.Log("Player Turn");
-        turn = Turn.Player;
-        _aiCoroutine = null;
     }
 
     void UpdateBoard() {
