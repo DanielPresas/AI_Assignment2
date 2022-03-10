@@ -1813,10 +1813,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2cceb462298a5c44a69bd33518c78ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  width: 3
+  height: 3
   oPiece: {fileID: 6111819194526080751, guid: a54e62985ce2d88488f4eada537c67a6, type: 3}
   xPiece: {fileID: 5973816781418320416, guid: 93defc36ee4d7c94a961aedfc7885d30, type: 3}
   trigger: {fileID: 7591128146924674219, guid: 7b6ab98fcba3b72488620c5b397297c9, type: 3}
-  squareSize: 5
+  squareSize: {x: 0, y: 0}
   state: 000000000000000000000000000000000000000000000000000000000000000000000000
 --- !u!1 &1700529138
 GameObject:

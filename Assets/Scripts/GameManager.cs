@@ -130,14 +130,27 @@ public class GameManager : MonoBehaviour {
         winText[1].gameObject.SetActive(false);
         currentTurnText.gameObject.SetActive(true);
 
-        for(int i = 0; i < Board.HEIGHT; ++i) {
-            for(int j = 0; j < Board.WIDTH; ++j) {
+        var mat = gameBoard.GetComponentInChildren<MeshRenderer>().sharedMaterial;
+        mat.mainTextureScale = new Vector2(gameBoard.width / 8.0f, gameBoard.height / 8.0f);
+
+        for(int i = 0; i < gameBoard.height; ++i) {
+            for(int j = 0; j < gameBoard.width; ++j) {
                 var t = Instantiate(gameBoard.trigger, gameBoard.transform);
                 t.transform.position = new Vector3 {
-                    x = j * gameBoard.squareSize,
-                    z = i * gameBoard.squareSize,
+                    x = j * gameBoard.squareSize.x,
+                    z = i * gameBoard.squareSize.y,
                 };
                 t.GetComponent<Trigger>().index = _activeTriggers;
+                t.GetComponent<BoxCollider>().size = new Vector3 {
+                    x = gameBoard.squareSize.x,
+                    y = 1.0f,
+                    z = gameBoard.squareSize.y,
+                };
+                t.GetComponent<BoxCollider>().center = new Vector3 {
+                    x = gameBoard.squareSize.x / 2.0f,
+                    y = 0.0f,
+                    z = gameBoard.squareSize.y / 2.0f,
+                };
 
                 _triggers.Add(t);
                 _activeTriggers += 1;
@@ -146,15 +159,41 @@ public class GameManager : MonoBehaviour {
         }
 
         var xPieces = new List<GameObject>();
-        for(int i = 0; i < Mathf.CeilToInt(Board.WIDTH * Board.HEIGHT / 2.0f); ++i) {
+        for(int i = 0; i < Mathf.CeilToInt(gameBoard.width * gameBoard.height / 2.0f); ++i) {
             var xp = Instantiate(gameBoard.xPiece, gameBoard.transform);
+
+            var xpm = xp.GetComponentInChildren<MeshRenderer>();
+            xpm.material.color = xColor;
+            xpm.transform.localScale = new Vector3 {
+                x = gameBoard.squareSize.x * 0.8f,
+                y = 0.2f,
+                z = gameBoard.squareSize.y * 0.8f,
+            };
+            xpm.transform.position = new Vector3 {
+                x = gameBoard.squareSize.x / 2.0f,
+                z = gameBoard.squareSize.y / 2.0f,
+            };
+
             xp.SetActive(false);
             xPieces.Add(xp);
         }
 
         var oPieces = new List<GameObject>();
-        for(int i = 0; i < Mathf.FloorToInt(Board.WIDTH * Board.HEIGHT / 2.0f); ++i) {
+        for(int i = 0; i < Mathf.FloorToInt(gameBoard.width * gameBoard.height / 2.0f); ++i) {
             var op = Instantiate(gameBoard.oPiece, gameBoard.transform);
+
+            var opm = op.GetComponentInChildren<MeshRenderer>();
+            opm.material.color = oColor;
+            opm.transform.localScale = new Vector3 {
+                x = gameBoard.squareSize.x * 0.8f,
+                y = 0.2f,
+                z = gameBoard.squareSize.y * 0.8f,
+            };
+            opm.transform.position = new Vector3 {
+                x = gameBoard.squareSize.x / 2.0f,
+                z = gameBoard.squareSize.y / 2.0f,
+            };
+
             op.SetActive(false);
             oPieces.Add(op);
         }
@@ -184,9 +223,9 @@ public class GameManager : MonoBehaviour {
             return;
         }
 
-        for(int i = 0; i < Board.HEIGHT; ++i) {
-            for(int j = 0; j < Board.WIDTH; ++j) {
-                var idx = i * Board.HEIGHT + j;
+        for(int i = 0; i < gameBoard.height; ++i) {
+            for(int j = 0; j < gameBoard.width; ++j) {
+                var idx = i * gameBoard.width + j;
                 var s = gameBoard.state[idx];
 
                 switch(s) {
@@ -194,9 +233,9 @@ public class GameManager : MonoBehaviour {
                         var pp = _playerPieces[_activePlayerPieces++];
                         pp.SetActive(true);
                         pp.transform.position = new Vector3 {
-                            x = j * gameBoard.squareSize,
+                            x = j * gameBoard.squareSize.x,
                             y = 0.2f,
-                            z = i * gameBoard.squareSize,
+                            z = i * gameBoard.squareSize.y,
                         };
                         gameBoard.state[idx] = Board.State.PlayerPiece;
                         break;
@@ -204,9 +243,9 @@ public class GameManager : MonoBehaviour {
                         var ap = _aiPieces[_activeAiPieces++];
                         ap.SetActive(true);
                         ap.transform.position = new Vector3 {
-                            x = j * gameBoard.squareSize,
+                            x = j * gameBoard.squareSize.x,
                             y = 0.2f,
-                            z = i * gameBoard.squareSize,
+                            z = i * gameBoard.squareSize.y,
                         };
                         gameBoard.state[idx] = Board.State.AiPiece;
                         break;

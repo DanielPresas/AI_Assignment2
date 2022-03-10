@@ -4,9 +4,9 @@ public class MinimaxAI {
         var bestScore = int.MinValue;
         var move = -1;
 
-        for(int i = 0; i < Board.HEIGHT; ++i) {
-            for(int j = 0; j < Board.WIDTH; ++j) {
-                var idx = i * Board.HEIGHT + j;
+        for(int i = 0; i < board.height; ++i) {
+            for(int j = 0; j < board.width; ++j) {
+                var idx = i * board.width + j;
                 if(board.state[idx] == Board.State.Empty) {
                     board.state[idx] = Board.State.AiPiece;
                     var score = Minimax(board, 0, isMaximizing: false);
@@ -30,9 +30,9 @@ public class MinimaxAI {
 
         if(isMaximizing) {
             var maxScore = int.MinValue;
-            for(int i = 0; i < Board.HEIGHT; ++i) {
-                for(int j = 0; j < Board.WIDTH; ++j) {
-                    var idx = i * Board.HEIGHT + j;
+            for(int i = 0; i < board.height; ++i) {
+                for(int j = 0; j < board.width; ++j) {
+                    var idx = i * board.width + j;
                     if(board.state[idx] != Board.State.Empty) {
                         continue;
                     }
@@ -49,9 +49,9 @@ public class MinimaxAI {
 
         // @Note: if(!isMaximizing)
         var minScore = int.MaxValue;
-        for(int i = 0; i < Board.HEIGHT; ++i) {
-            for(int j = 0; j < Board.WIDTH; ++j) {
-                var idx = i * Board.HEIGHT + j;
+        for(int i = 0; i < board.height; ++i) {
+            for(int j = 0; j < board.width; ++j) {
+                var idx = i * board.width + j;
                 if(board.state[idx] != Board.State.Empty) {
                     continue;
                 }
