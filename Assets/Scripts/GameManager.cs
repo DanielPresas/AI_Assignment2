@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,10 +16,17 @@ public enum Turn {
 
 public class GameManager : MonoBehaviour {
 
+    [Header("Game Objects")]
     public Board gameBoard   = null;
     public bool stateChanged = false;
-    public Turn startingTurn = Turn.Player;
     public Turn turn         = Turn.Player;
+
+    [Header("UI Objects")]
+    public TextMeshProUGUI currentTurnText = null;
+    public TextMeshProUGUI[] winText       = null;
+    [Space]
+    public Color xColor = new Color(0.37f, 0.54f, 0.38f);
+    public Color oColor = new Color(0.81f, 0.54f, 0.30f);
 
     List<GameObject> _playerPieces = new List<GameObject>();
     List<GameObject> _aiPieces     = new List<GameObject>();
@@ -30,25 +38,29 @@ public class GameManager : MonoBehaviour {
 
     Coroutine _resetCoroutine = null;
     float _aiWaitTime = 0.0f;
+    Color _playerColor, _aiColor;
 
     private void Update() {
         {
             var endGame = false;
 
             if(gameBoard.CheckWin(Turn.Player)) {
-                Debug.Log($"Player wins!");
+                winText[0].text = "Player wins!";
                 endGame = true;
             }
             else if(gameBoard.CheckWin(Turn.Ai)) {
-                Debug.Log($"AI wins!");
+                winText[0].text = "AI wins!";
                 endGame = true;
             }
             else if(gameBoard.CheckTie()) {
-                Debug.Log("Draw! Resetting...");
+                winText[0].text = "Draw!";
                 endGame = true;
             }
 
             if(endGame) {
+                winText[0].gameObject.SetActive(true);
+                winText[1].gameObject.SetActive(true);
+
                 if(_resetCoroutine == null) {
                     _resetCoroutine = StartCoroutine(ResetLevel());
                 }
@@ -56,14 +68,16 @@ public class GameManager : MonoBehaviour {
             }
         }
 
+        currentTurnText.text = $"{(turn == Turn.Ai ? turn.ToString().ToUpper() : turn.ToString())}";
+
         if(turn == Turn.Player) {
+            currentTurnText.color = _playerColor;
             if(Input.GetMouseButtonDown(MouseButton.Left)) {
                 var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 if(!Physics.Raycast(ray, out var hitInfo, maxDistance: 20.0f)) {
                     return;
                 }
 
-                Debug.Log($"Hit: {hitInfo.collider.gameObject.name}");
                 var t = hitInfo.collider.gameObject.GetComponent<Trigger>();
                 if(gameBoard.state[t.index] != Board.State.Empty) {
                     return;
@@ -77,9 +91,10 @@ public class GameManager : MonoBehaviour {
                 turn = Turn.Ai;
                 _aiWaitTime = 0.5f;
             }
-            Debug.Log("AI turn");
         }
         else {
+            currentTurnText.color = _aiColor;
+
             if(_aiWaitTime >= 0.0f) {
                 _aiWaitTime -= Time.deltaTime;
                 return;
@@ -89,7 +104,6 @@ public class GameManager : MonoBehaviour {
                 var bestMove = MinimaxAI.FindBestMove(gameBoard);
                 if(!_triggers[bestMove].activeSelf) continue;
 
-                Debug.Log($"AI chose: {bestMove + 1}");
                 gameBoard.state[bestMove] = Board.State.NewAiPiece;
                 _triggers[bestMove].SetActive(false);
                 _activeTriggers -= 1;
@@ -99,15 +113,22 @@ public class GameManager : MonoBehaviour {
             while(!stateChanged);
 
             turn = Turn.Player;
-            Debug.Log("Player turn");
         }
 
         UpdateBoard();
     }
 
+    IEnumerator ResetLevel() {
+        yield return new WaitForSeconds(3.0f);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
     public void ResetGame(bool playerIsX = true) {
-        Random.InitState(seed: (int)System.DateTime.Now.ToFileTimeUtc()); // @Temp
         _resetCoroutine = null;
+
+        winText[0].gameObject.SetActive(false);
+        winText[1].gameObject.SetActive(false);
+        currentTurnText.gameObject.SetActive(true);
 
         for(int i = 0; i < Board.HEIGHT; ++i) {
             for(int j = 0; j < Board.WIDTH; ++j) {
@@ -139,14 +160,22 @@ public class GameManager : MonoBehaviour {
         }
 
         if(playerIsX) {
-            startingTurn = turn = Turn.Player;
+            turn = Turn.Player;
             _playerPieces.AddRange(xPieces);
             _aiPieces.AddRange(oPieces);
+
+            currentTurnText.text = "Player";
+            _playerColor = xColor;
+            _aiColor = oColor;
         }
         else {
-            startingTurn = turn = Turn.Ai;
+            turn = Turn.Ai;
             _aiPieces.AddRange(xPieces);
             _playerPieces.AddRange(oPieces);
+
+            currentTurnText.text = "AI";
+            _playerColor = oColor;
+            _aiColor = xColor;
         }
     }
 
@@ -187,11 +216,5 @@ public class GameManager : MonoBehaviour {
             }
         }
         stateChanged = false;
-    }
-
-
-    IEnumerator ResetLevel() {
-        yield return new WaitForSeconds(5.0f);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
