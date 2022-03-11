@@ -31,6 +31,8 @@ public class Board : MonoBehaviour {
             y = GetComponentInChildren<MeshRenderer>().transform.localScale.x / height,
         };
 
+        var mat = GetComponentInChildren<MeshRenderer>().material;
+        mat.mainTextureScale = new Vector2(width, height) / 8.0f;
     }
 
     public bool CheckTie() {

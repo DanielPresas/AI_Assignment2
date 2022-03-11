@@ -130,9 +130,6 @@ public class GameManager : MonoBehaviour {
         winText[1].gameObject.SetActive(false);
         currentTurnText.gameObject.SetActive(true);
 
-        var mat = gameBoard.GetComponentInChildren<MeshRenderer>().sharedMaterial;
-        mat.mainTextureScale = new Vector2(gameBoard.width / 8.0f, gameBoard.height / 8.0f);
-
         for(int i = 0; i < gameBoard.height; ++i) {
             for(int j = 0; j < gameBoard.width; ++j) {
                 var t = Instantiate(gameBoard.trigger, gameBoard.transform);
